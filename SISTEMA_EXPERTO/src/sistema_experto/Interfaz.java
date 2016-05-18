@@ -26,6 +26,15 @@ public class Interfaz extends javax.swing.JFrame {
     ArrayList<Problema> lista_problemas= new ArrayList<Problema>();
     public Interfaz() {
         initComponents();
+        NombreVariable.setEnabled(false);
+        univalorada.setEnabled(false);
+        numerica.setEnabled(false);
+        multivalorada.setEnabled(false);
+        agregar_variable.setEnabled(false);
+        definir_obejtivo.setEnabled(false);
+        lista_objetivos.setEnabled(false);
+        mostrarRegla.setEnabled(false);
+        definirRegla.setEnabled(false);
     
     }
 
@@ -49,7 +58,7 @@ public class Interfaz extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        definirRegla = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tablaVariables = new javax.swing.JTable();
         jScrollPane3 = new javax.swing.JScrollPane();
@@ -112,10 +121,10 @@ public class Interfaz extends javax.swing.JFrame {
         jLabel8.setFont(new java.awt.Font("Times New Roman", 1, 24)); // NOI18N
         jLabel8.setText("REGLAS");
 
-        jButton1.setText("DEFINIR REGLA");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        definirRegla.setText("DEFINIR REGLA");
+        definirRegla.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                definirReglaActionPerformed(evt);
             }
         });
 
@@ -144,6 +153,7 @@ public class Interfaz extends javax.swing.JFrame {
 
         textoRegla.setColumns(20);
         textoRegla.setRows(5);
+        textoRegla.setEnabled(false);
         jScrollPane2.setViewportView(textoRegla);
 
         mostrarRegla.setText("MOSTRAR");
@@ -170,7 +180,7 @@ public class Interfaz extends javax.swing.JFrame {
                             .addComponent(mostrarRegla))
                         .addGroup(panelReglasLayout.createSequentialGroup()
                             .addGap(88, 88, 88)
-                            .addComponent(jButton1))))
+                            .addComponent(definirRegla))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(panelReglasLayout.createSequentialGroup()
@@ -200,7 +210,7 @@ public class Interfaz extends javax.swing.JFrame {
                         .addGap(7, 7, 7)
                         .addComponent(mostrarRegla)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton1)))
+                        .addComponent(definirRegla)))
                 .addContainerGap(22, Short.MAX_VALUE))
         );
 
@@ -415,9 +425,21 @@ public class Interfaz extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItem3MouseClicked
 
     private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
-       problema=new Problema();
+       NombreVariable.setEnabled(true);
+        univalorada.setEnabled(true);
+        numerica.setEnabled(true);
+        multivalorada.setEnabled(true);
+        agregar_variable.setEnabled(true);
+         definir_obejtivo.setEnabled(true);
+        lista_objetivos.setEnabled(true);
+        
+        mostrarRegla.setEnabled(true);
+        definirRegla.setEnabled(true);
+        
+        problema=new Problema();
         JFrame frame = new JFrame("INGRESO DE DATOS");
         problema.nombre = JOptionPane.showInputDialog(frame, "¿NOMBRE DEL NUEVO PROBLEMA?");      
+        
         lista_problemas.add(problema);
     }//GEN-LAST:event_jMenuItem3ActionPerformed
 
@@ -428,6 +450,7 @@ public class Interfaz extends javax.swing.JFrame {
         JOptionPane.showMessageDialog( null, "FALTA EL NOMBRE DE  LA VARIABLE" );
     }else{
         if(numerica.isSelected()){
+            System.out.println(NombreVariable.getText());
             problema.variables.put(NombreVariable.getText(),"N");
         }else if(univalorada.isSelected()){
             problema.variables.put(NombreVariable.getText(),"U");
@@ -451,7 +474,7 @@ public class Interfaz extends javax.swing.JFrame {
              modelo_reglas.addRow(new Object[]{e.getKey(),e.getValue()," ",});
              }
             
-            
+            NombreVariable.setText(" ");
   
  
     }//GEN-LAST:event_agregar_variableActionPerformed
@@ -516,26 +539,30 @@ public class Interfaz extends javax.swing.JFrame {
         
     }//GEN-LAST:event_definir_obejtivoActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void definirReglaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_definirReglaActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_definirReglaActionPerformed
 
     private void mostrarReglaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mostrarReglaActionPerformed
         String linea1="";
         System.out.println(problema.variables.size());
         System.out.println(tablaVariables.getRowCount());
             textoRegla.setText("");
+            System.out.println();
         for (int i = 0; i <problema.variables.size(); i++) {
-            linea1+=(String) tablaVariables.getValueAt(i,0);
+            System.out.println(linea1);
+            if(tablaVariables.getValueAt(i,2)!=""){
+             linea1+=(String) tablaVariables.getValueAt(i,0);
             linea1+=" = "+ (String)tablaVariables.getValueAt(i,2);
             if(tablaVariables.getValueAt(i,3).equals("Y")){
                 linea1+=" Y ";
             }else if(tablaVariables.getValueAt(i,3).equals("O")){
                 linea1+=" O ";
-            }else if(tablaVariables.getValueAt(i,3).equals("NULL")){
-                linea1+="NULL";
+            }else if(tablaVariables.getValueAt(i,3).equals("NULL")||tablaVariables.getValueAt(i,3).equals("")){
+                linea1+=" ";
+            
             }
- 
+           }
         }
         for (int i = 0; i <problema.objetivos.size(); i++) {
             linea1+=" entonces "+(String)tablaObjetivos.getValueAt(i, 0)+" = "+(String)tablaObjetivos.getValueAt(i,2);
@@ -590,8 +617,8 @@ public class Interfaz extends javax.swing.JFrame {
     private javax.swing.JButton agregar_variable;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.ButtonGroup buttonGroup2;
+    private javax.swing.JButton definirRegla;
     private javax.swing.JButton definir_obejtivo;
-    private javax.swing.JButton jButton1;
     private javax.swing.JInternalFrame jInternalFrame1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
