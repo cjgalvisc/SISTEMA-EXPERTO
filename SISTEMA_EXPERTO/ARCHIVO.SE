@@ -1,12 +1,12 @@
 %variables nombre(TIPO)
-uno(N)
-dos(U)
-tres(M)
+uno N
+dos U
+tres M
 
-%objetivos Cnombre)
-Ctres
+%objetivos C(nombre)
+C tres M
 
 %reglas SI(variable=valor)ENTONCES(objetivo=valor)
 %condiciionales "Y" "O"
 
-SI(uno=1Odos=si)ENTONCES(tres=si)
+SI uno:1Odos:si ENTONCES tres:si

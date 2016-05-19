@@ -10,10 +10,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.JCheckBox;
 
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -37,13 +40,15 @@ public class Interfaz extends javax.swing.JFrame {
     String linea;
     //para almacenar el nombre del TXT
     String nombre_problema;
+    //donde queda almacenada la informacion de un problema creado para ser almacenado en un TXT
+    String codigo="";
     //arraylist donde queda cada linea del TXT
     ArrayList<String> lineas= new ArrayList<String>();
     //expresiones regulares para verificar la sintaxis del TXT.SE
         String patron_comentario="^[%]+[\\w]";
-        String patron_variable="^[\\w]+[(]+[N|U|M]+[)]";
-        String patron_objetivo="^C[\\w]";
-        String patron_regla="[SI(][\\w][)ENTONCES(][\\w][)]";
+        String patron_variable="^[\\w]+[\\s]+[N|U|M]";
+        String patron_objetivo="^C+[\\s]+[\\w]+[\\s]+[N|U|M]";
+        String patron_regla="[\\w]";
         
     public Interfaz() {
         initComponents();
@@ -67,23 +72,88 @@ public class Interfaz extends javax.swing.JFrame {
     //funcion para leer los archivos y almacenarlos en el arraylist lista_lineas
      public void  leerTxt(String direccion)
      {
+         //creo un modelo de la tabla vairables para meter las variables
+         DefaultTableModel modelo_variables=(DefaultTableModel) tablaVariables.getModel(); 
+         //creo un modelo de la tabla objetivos para meter los objetivos
+         DefaultTableModel modelo_objetivos=(DefaultTableModel) tablaObjetivos.getModel(); 
          //instancion un objeto de la clase problema cada vez que se abre un nuevo archivo
          problema=new Problema();
          try{
                 BufferedReader bf=new BufferedReader(new FileReader(direccion));
                 while((linea=bf.readLine())!=null){
                     //para quitar los espacios en blanco y leer linea a linea
-                    lineas.add(linea.replaceAll("\\s+", " ").trim());
+                    if(!(linea.replaceAll("\\s+", " ").trim().equals(""))){
+                        lineas.add(linea);
+                    }
                 }
-                
-              //llamo la funcion para comprobar sintaxis
-              sintaxis(lineas);
+             //llamo la funcion para comprobar sintaxis
+             //si la sintaxis es correcta extraigo la informacion y la monto en las tablas
+              if(sintaxis(lineas)){
+                  //para habilitar los botnes
+                    NombreVariable.setEnabled(true);
+                    univalorada.setEnabled(true);
+                    numerica.setEnabled(true);
+                    multivalorada.setEnabled(true);
+                    agregar_variable.setEnabled(true);
+                     definir_obejtivo.setEnabled(true);
+                    lista_objetivos.setEnabled(true);
+
+                    mostrarRegla.setEnabled(true);
+                    definirRegla.setEnabled(true);
+                    definirPregunta.setEnabled(true);
+
+                    verificarModelo.setEnabled(true);
+                    ejecutar.setEnabled(true);
+                    
+                  String token;
+                  for (int i = 0; i <lineas.size(); i++) {
+                      //parte en tokens separados por espacios en blanco
+                      
+                      //para ver si es un comentario
+                        Pattern patron_com=Pattern.compile(patron_comentario);
+                        Matcher emparejador_com= patron_com.matcher(lineas.get(i));
+                        boolean coincide_com= emparejador_com.find();
+                        //para comparar con el patron variable
+                        Pattern patron_var=Pattern.compile(patron_variable);
+                        Matcher emparejador_var= patron_var.matcher(lineas.get(i));
+                        boolean coincide_var= emparejador_var.find();
+                        //para comparar con el patron objetivo
+                        Pattern patron_obj=Pattern.compile(patron_objetivo);
+                        Matcher emparejador_obj= patron_obj.matcher(lineas.get(i));
+                        boolean coincide_obj= emparejador_obj.find();
+                        //para comparar con el patron regla
+                        Pattern patron_reg=Pattern.compile(patron_regla);
+                        Matcher emparejador_reg= patron_reg.matcher(lineas.get(i));
+                        boolean coincide_reg= emparejador_reg.find();
+                       
+                      if(coincide_var){//si se cumple es una variable 
+                          StringTokenizer tokens=new StringTokenizer(lineas.get(i));
+                          String token1=tokens.nextToken();
+                          String token2=tokens.nextToken();
+                          problema.variables.put(token1, token2);
+                          modelo_variables.addRow(new Object[]{token1,token2," ",});
+                          
+                      }else if(coincide_obj){//si se cumple es un objetivo
+                          StringTokenizer tokens=new StringTokenizer(lineas.get(i));
+                          String token1=tokens.nextToken();
+                          String token2=tokens.nextToken();
+                          String token3=tokens.nextToken();
+                          problema.objetivos.put(token2, token3);
+                          modelo_objetivos.addRow(new Object[]{token2,token3,});
+                          
+                      }else if(coincide_reg){//si se cumple es una regla
+                          
+                          problema.reglas.add(lineas.get(i));
+                          textoRegla.setText(lineas.get(i)+"\n");
+                      }
+                  }
+              }
             }catch(Exception e){
                 JOptionPane.showMessageDialog(null,"EL ARCHIVO NO SE PUDO LEER");
             }
     }
      //funcion para verificar sintaxis
-     public void  sintaxis(ArrayList<String> p)
+     public boolean sintaxis(ArrayList<String> p)
      {
          for (int i = 0; i <p.size(); i++) {
              //para comparar con el patron comentario
@@ -102,16 +172,15 @@ public class Interfaz extends javax.swing.JFrame {
              Pattern patron_reg=Pattern.compile(patron_regla);
              Matcher emparejador_reg= patron_reg.matcher(lineas.get(i));
              boolean coincide_reg= emparejador_reg.find();
-             //para ver si es una linea vacia.
-             boolean espacioenblanco=lineas.get(i).length()==0;
-             //si todos son falsos es por que noingun patron sirvio
-             if(!coincide_com && !coincide_var && !coincide_obj && !coincide_reg && !espacioenblanco){
+              //si todos son falsos es por que noingun patron sirvio
+             if(!coincide_com && !coincide_var && !coincide_obj && !coincide_reg ){
                  System.out.println(i);
                  JOptionPane.showMessageDialog( null, "ERROR DE SINTAXIS" );
-                 i=p.size();//para que salga del ciclo
+                 return false;
              }
          }
                JOptionPane.showMessageDialog( null, "SINTAXIS CORRECTA" );
+               return true;
      
      }
     @SuppressWarnings("unchecked")
@@ -153,7 +222,7 @@ public class Interfaz extends javax.swing.JFrame {
         listaTabla = new javax.swing.JComboBox<>();
         jPanel1 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
-        variablePregunta = new javax.swing.JComboBox<>();
+        listaPreguntas = new javax.swing.JComboBox<>();
         jScrollPane4 = new javax.swing.JScrollPane();
         pregunta = new javax.swing.JTextArea();
         definirPregunta = new javax.swing.JButton();
@@ -214,7 +283,7 @@ public class Interfaz extends javax.swing.JFrame {
 
         tablaVariables.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null}
+
             },
             new String [] {
                 "NOMBRE", "TIPO", "VALOR", "CONDICIONAL"
@@ -478,6 +547,11 @@ public class Interfaz extends javax.swing.JFrame {
         jScrollPane4.setViewportView(pregunta);
 
         definirPregunta.setText("DEFINIR PREGUNTA");
+        definirPregunta.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                definirPreguntaActionPerformed(evt);
+            }
+        });
 
         verficarPregunta.setText("...");
         verficarPregunta.addActionListener(new java.awt.event.ActionListener() {
@@ -498,7 +572,7 @@ public class Interfaz extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(33, 33, 33)
-                        .addComponent(variablePregunta, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(listaPreguntas, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(27, 27, 27)
                         .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 379, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -516,7 +590,7 @@ public class Interfaz extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(variablePregunta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(listaPreguntas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(verficarPregunta))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(definirPregunta)
@@ -598,6 +672,11 @@ public class Interfaz extends javax.swing.JFrame {
 
         jMenuItem4.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_G, java.awt.event.InputEvent.CTRL_MASK));
         jMenuItem4.setText("GUARDAR");
+        jMenuItem4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem4ActionPerformed(evt);
+            }
+        });
         jMenu1.add(jMenuItem4);
 
         jMenuBar1.add(jMenu1);
@@ -704,14 +783,15 @@ public class Interfaz extends javax.swing.JFrame {
         } 
        //para remover la lisa de ITEMS
         lista_objetivos.removeAllItems();
-        variablePregunta.removeAllItems();
+        listaPreguntas.removeAllItems();
        //para imprimir las variables en la tabla de variables y en el panel de objetivos
        Iterator it_variables4 = problema.variables.entrySet().iterator();
             while (it_variables4.hasNext()) 
              {
              Map.Entry e = (Map.Entry)it_variables4.next();
              lista_objetivos.addItem((String) e.getKey());
-             variablePregunta.addItem((String) e.getKey());
+             listaPreguntas.addItem((String) e.getKey());
+             
              modelo_reglas.addRow(new Object[]{e.getKey(),e.getValue()," ",});
              }
             
@@ -781,11 +861,11 @@ public class Interfaz extends javax.swing.JFrame {
     }//GEN-LAST:event_definir_obejtivoActionPerformed
 
     private void definirReglaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_definirReglaActionPerformed
-        // TODO add your handling code here:
+        problema.reglas.add(textoRegla.getText());
     }//GEN-LAST:event_definirReglaActionPerformed
 
     private void mostrarReglaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mostrarReglaActionPerformed
-        String linea1="";
+        String linea1="SI ";
         System.out.println(problema.variables.size());
         System.out.println(tablaVariables.getRowCount());
             textoRegla.setText("");
@@ -806,7 +886,7 @@ public class Interfaz extends javax.swing.JFrame {
            }
         }
         for (int i = 0; i <problema.objetivos.size(); i++) {
-            linea1+=" entonces "+(String)tablaObjetivos.getValueAt(i, 0)+" = "+(String)tablaObjetivos.getValueAt(i,2);
+            linea1+=" ENTONCES "+(String)tablaObjetivos.getValueAt(i, 0)+" = "+(String)tablaObjetivos.getValueAt(i,2);
         }
     
         textoRegla.setText(linea1);
@@ -839,6 +919,29 @@ public class Interfaz extends javax.swing.JFrame {
 
     private void verificarModeloActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_verificarModeloActionPerformed
         
+        String variables="";
+        String objetivos="";
+        String reglas="";
+        //para recorrer las varibles
+        Iterator it_variables= problema.variables.entrySet().iterator();
+            while (it_variables.hasNext()) 
+             {
+                 Map.Entry e = (Map.Entry)it_variables.next();
+                 variables+=e.getKey()+" "+e.getValue()+"\n";
+             }
+        //para recorrer los objetivos
+        Iterator it_variables2= problema.objetivos.entrySet().iterator();
+            while (it_variables2.hasNext()) 
+             {
+                 Map.Entry e = (Map.Entry)it_variables2.next();
+                 objetivos+="C"+" "+e.getKey()+" "+e.getValue()+"\n";
+             }
+        //para recorre las reglas
+        for (int i = 0; i < problema.reglas.size(); i++) {
+            reglas+=problema.reglas.get(i)+"\n";
+        }
+        codigo=variables+objetivos+reglas;
+        JOptionPane.showMessageDialog( null,codigo); 
     }//GEN-LAST:event_verificarModeloActionPerformed
 
     private void ABRIRActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ABRIRActionPerformed
@@ -855,19 +958,31 @@ public class Interfaz extends javax.swing.JFrame {
     }//GEN-LAST:event_ABRIRActionPerformed
 
     private void ejecutarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ejecutarActionPerformed
-        //para comparar con el patron regla
-            String linea4="SI(uno)ENTONCES(tres)";
-             Pattern patron_reg1=Pattern.compile(patron_regla);
-             Matcher emparejador_reg1= patron_reg1.matcher(linea4);
-             boolean coincide_reg1= emparejador_reg1.find();
-             System.out.println(patron_regla);
-             System.out.println(linea4);
-             System.out.println(coincide_reg1);
-             
-             
-             
-             
+     //falta verificar en el diccionario de variables para asignar pregunta segun tipo
+        Iterator it_variables2= problema.preguntas.entrySet().iterator();
+            while (it_variables2.hasNext()) 
+             {
+                 Map.Entry e = (Map.Entry)it_variables2.next();
+                 if(e.getValue().equals("N")){
+                     
+                 }else  {
+                     JCheckBox   rememberChk1 = new JCheckBox("SI");
+                     JCheckBox   rememberChk2 = new JCheckBox("NO");
+                     String msg =(String) e.getValue(); 
+                     Object[]  msgContent = {msg, rememberChk1,rememberChk2}; 
+                     int n=JOptionPane.showConfirmDialog (null,msgContent,"Title", JOptionPane.YES_NO_OPTION);
+                 }
+             }
+
     }//GEN-LAST:event_ejecutarActionPerformed
+
+    private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jMenuItem4ActionPerformed
+
+    private void definirPreguntaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_definirPreguntaActionPerformed
+    problema.preguntas.put((String) listaPreguntas.getSelectedItem(),pregunta.getText());
+    }//GEN-LAST:event_definirPreguntaActionPerformed
 
     /**
      * @param args the command line arguments
@@ -938,6 +1053,7 @@ public class Interfaz extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JComboBox<String> listaPreguntas;
     private javax.swing.JComboBox<String> listaTabla;
     private javax.swing.JComboBox<String> lista_objetivos;
     private javax.swing.JButton mostrarRegla;
@@ -951,7 +1067,6 @@ public class Interfaz extends javax.swing.JFrame {
     private javax.swing.JTable tablaVariables;
     private javax.swing.JTextArea textoRegla;
     private javax.swing.JCheckBox univalorada;
-    private javax.swing.JComboBox<String> variablePregunta;
     private javax.swing.JButton verficarPregunta;
     private javax.swing.JButton verificarModelo;
     // End of variables declaration//GEN-END:variables
