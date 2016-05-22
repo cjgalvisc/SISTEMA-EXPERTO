@@ -434,7 +434,7 @@ public class Interfaz extends javax.swing.JFrame {
                         .addComponent(NombreVariable)
                         .addGap(55, 55, 55))))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelVariblesLayout.createSequentialGroup()
-                .addContainerGap(110, Short.MAX_VALUE)
+                .addContainerGap(106, Short.MAX_VALUE)
                 .addComponent(jLabel6)
                 .addGap(70, 70, 70))
         );
@@ -498,7 +498,7 @@ public class Interfaz extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        listaTabla.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "NULL", "Y", "O" }));
+        listaTabla.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Y", "O", "NULL" }));
         listaTabla.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 listaTablaActionPerformed(evt);
@@ -613,7 +613,7 @@ public class Interfaz extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        lobjetivo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "NULL", "Y", "O" }));
+        lobjetivo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Y", "O", "NULL" }));
 
         combo1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "SI", "NO" }));
 
@@ -816,28 +816,49 @@ public class Interfaz extends javax.swing.JFrame {
         String linea1="SI ";
         System.out.println(problema.variables.size());
         System.out.println(tablaVariables.getRowCount());
-            textoRegla.setText("");
-            System.out.println();
-        for (int i = 0; i <problema.variables.size(); i++) {
-            System.out.println(linea1);
-            if(tablaVariables.getValueAt(i,2).equals("")){
-            }else{
-                linea1+=(String) tablaVariables.getValueAt(i,0);
-            linea1+=" = "+ (String)tablaVariables.getValueAt(i,2);
+        textoRegla.setText("");
+
+        for (int i = 0; i <tablaVariables.getRowCount(); i++) {
+           if(tablaVariables.getValueAt(i,1).equals("SI")&&tablaVariables.getValueAt(i,2).equals("Y")){
+                linea1+=(String) tablaVariables.getValueAt(i,0)+"="+"SI"+" Y";
+                
+            }else if(tablaVariables.getValueAt(i,1).equals("SI")&&tablaVariables.getValueAt(i,2).equals("O")){
+                linea1+=(String) tablaVariables.getValueAt(i,0)+"="+"SI"+" O";
+                
+            }else if(tablaVariables.getValueAt(i,1).equals("NO")&&tablaVariables.getValueAt(i,2).equals("Y")){
+                linea1+=(String) tablaVariables.getValueAt(i,0)+"="+"NO"+" Y";
+                
+            }else if(tablaVariables.getValueAt(i,1).equals("NO")&&tablaVariables.getValueAt(i,2).equals("O")){
+                linea1+=(String) tablaVariables.getValueAt(i,0)+"="+"NO"+" O";
+                
+            }else if(tablaVariables.getValueAt(i,1).equals("SI")&&tablaVariables.getValueAt(i,2).equals("NULL")){
+                System.out.println(linea1);
+                linea1+=(String)tablaVariables.getValueAt(i,0)+"="+"SI"+" ";
+                
+            }else if(tablaVariables.getValueAt(i,1).equals("NO")&&tablaVariables.getValueAt(i,2).equals("NULL")){
+                linea1+=(String)tablaVariables.getValueAt(i,0)+"="+"NO"+" ";
             }
-             
-            if(tablaVariables.getValueAt(i,3).equals("Y")){
-                linea1+=" Y ";
-            }else if(tablaVariables.getValueAt(i,3).equals("O")){
-                linea1+=" O ";
-            }else if(tablaVariables.getValueAt(i,3).equals("NULL")||tablaVariables.getValueAt(i,3).equals("")){
-                linea1+=" ";
-            
-            }
-           }
+        }
         
-        for (int i = 0; i <problema.objetivos.size(); i++) {
-            linea1+=" ENTONCES "+(String)tablaObjetivos.getValueAt(i, 0)+" = "+(String)tablaObjetivos.getValueAt(i,2);
+        for (int i = 0; i <tablaObjetivos.getRowCount(); i++) {
+            if(tablaObjetivos.getValueAt(i,1).equals("SI")&&tablaObjetivos.getValueAt(i,2).equals("Y")){
+                linea1+=" ENTONCES "+(String)tablaObjetivos.getValueAt(i, 0)+" = "+(String)tablaObjetivos.getValueAt(i,1)+" Y";
+                
+            }else if(tablaObjetivos.getValueAt(i,1).equals("SI")&&tablaObjetivos.getValueAt(i,2).equals("O")){
+                linea1+=" ENTONCES "+(String)tablaObjetivos.getValueAt(i, 0)+" = "+(String)tablaObjetivos.getValueAt(i,1)+" O";
+                
+            }else if(tablaObjetivos.getValueAt(i,1).equals("NO")&&tablaObjetivos.getValueAt(i,2).equals("Y")){
+                linea1+=" ENTONCES "+(String)tablaObjetivos.getValueAt(i, 0)+" = "+(String)tablaObjetivos.getValueAt(i,1)+" Y";
+                
+            }else if(tablaObjetivos.getValueAt(i,1).equals("SI")&&tablaObjetivos.getValueAt(i,2).equals("O")){
+                linea1+=" ENTONCES "+(String)tablaObjetivos.getValueAt(i, 0)+" = "+(String)tablaObjetivos.getValueAt(i,1)+" O";
+                
+            }else if(tablaObjetivos.getValueAt(i,1).equals("SI")&&tablaObjetivos.getValueAt(i,2).equals("NULL")){
+                linea1+=" ENTONCES "+(String)tablaObjetivos.getValueAt(i, 0)+" = "+"SI"+" ";
+                
+            }else if(tablaObjetivos.getValueAt(i,1).equals("NO")&&tablaObjetivos.getValueAt(i,1).equals("NULL")){
+                linea1+=" ENTONCES "+(String)tablaObjetivos.getValueAt(i, 0)+" = "+"NO"+" ";
+            }
         }
     
         textoRegla.setText(linea1);
@@ -914,15 +935,27 @@ public class Interfaz extends javax.swing.JFrame {
             while (it_variables2.hasNext()) 
              {
                  Map.Entry e = (Map.Entry)it_variables2.next();
-                 if(e.getValue().equals("N")){
-                     
-                 }else  {
-                     JCheckBox   rememberChk1 = new JCheckBox("SI");
-                     JCheckBox   rememberChk2 = new JCheckBox("NO");
-                     String msg =(String) e.getValue(); 
-                     Object[]  msgContent = {msg, rememberChk1,rememberChk2}; 
-                     int n=JOptionPane.showConfirmDialog (null,msgContent,"Title", JOptionPane.YES_NO_OPTION);
-                 }
+                    JCheckBox   rememberChk1 = new JCheckBox("SI");
+                    JCheckBox   rememberChk2 = new JCheckBox("NO");
+                    String msg =(String) e.getValue(); 
+                    Object[]  msgContent = {msg, rememberChk1,rememberChk2}; 
+                    int n=JOptionPane.showConfirmDialog (null,msgContent,"PREGUNTA", JOptionPane.YES_NO_OPTION);
+                    if(rememberChk1.isSelected()){
+                        Iterator it_variables3= problema.preguntas.entrySet().iterator();
+                        while (it_variables3.hasNext()) 
+                         {
+                             Map.Entry e1= (Map.Entry)it_variables3.next();
+                             if(e1.getKey().equals(e.getKey())){
+                                 problema.variables.put(e1.getKey(),);
+                             }else{
+                                 
+                             }
+                         }
+                         
+                        
+                    }else{
+                        
+                    }
              }
 
     }//GEN-LAST:event_ejecutarActionPerformed

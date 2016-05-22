@@ -471,7 +471,7 @@
                   </Group>
               </Group>
               <Group type="102" alignment="1" attributes="0">
-                  <EmptySpace pref="110" max="32767" attributes="0"/>
+                  <EmptySpace pref="106" max="32767" attributes="0"/>
                   <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="70" max="-2" attributes="0"/>
               </Group>
@@ -603,9 +603,9 @@
       <Properties>
         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
           <StringArray count="3">
-            <StringItem index="0" value="NULL"/>
-            <StringItem index="1" value="Y"/>
-            <StringItem index="2" value="O"/>
+            <StringItem index="0" value="Y"/>
+            <StringItem index="1" value="O"/>
+            <StringItem index="2" value="NULL"/>
           </StringArray>
         </Property>
       </Properties>
@@ -798,9 +798,9 @@
       <Properties>
         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
           <StringArray count="3">
-            <StringItem index="0" value="NULL"/>
-            <StringItem index="1" value="Y"/>
-            <StringItem index="2" value="O"/>
+            <StringItem index="0" value="Y"/>
+            <StringItem index="1" value="O"/>
+            <StringItem index="2" value="NULL"/>
           </StringArray>
         </Property>
       </Properties>
