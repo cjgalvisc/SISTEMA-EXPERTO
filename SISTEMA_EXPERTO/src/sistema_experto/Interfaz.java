@@ -14,6 +14,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -57,6 +58,8 @@ public class Interfaz extends javax.swing.JFrame {
         String patron_variable="^[V]+[-]+[\\w]";
         String patron_objetivo="^C+[-]+[\\w]";
         String patron_regla="[\\w]";
+     //donde queda el resultado final
+     ArrayList<String> resultado=new ArrayList<String>();  
         
     public Interfaz() {
         initComponents();
@@ -80,8 +83,6 @@ public class Interfaz extends javax.swing.JFrame {
      {
          //creo un modelo de la tabla vairables para meter las variables
          DefaultTableModel modelo_variables=(DefaultTableModel) tablaVariables.getModel(); 
-         //creo un modelo de la tabla objetivos para meter los objetivos
-         DefaultTableModel modelo_objetivos=(DefaultTableModel) tablaObjetivos.getModel(); 
          //instancion un objeto de la clase problema cada vez que se abre un nuevo archivo
          problema=new Problema();
          try{
@@ -149,8 +150,8 @@ public class Interfaz extends javax.swing.JFrame {
                           String token1=tokens.nextToken();
                           String token2=tokens.nextToken();
                           problema.objetivos.put(token2, false);
-                          modelo_objetivos.addRow(new Object[]{token2,""});
-                         
+                          objetivo.setText(token2);
+                                              
                       }else if(coincide_reg){//si se cumple es una regla
                           
                           problema.reglas.add(lineas.get(i));
@@ -193,6 +194,53 @@ public class Interfaz extends javax.swing.JFrame {
                return true;
      
      }
+     
+     //funcion para encontrar el siguiente condicional
+     public int posop(String[] vector,int inicio,int fin){
+         int posicion=0;
+         for (int i =inicio; i <fin ; i++) {
+             if(vector[i].equals("Y")||vector[i].equals("O")){
+                 posicion=i;
+                 i=fin;
+              }
+         }
+         return posicion;
+      }
+     
+     //funcion para verificar si la repuesta del usuario es igual a la del condicional
+     public boolean valor(String valor){
+         boolean clave;
+         String pedazos[]=valor.split("=");
+         
+         if(pedazos[1].equals("true")){
+                clave=true;
+         }else{
+                clave=false;
+           }
+         
+         if(problema.variables.get(pedazos[0]).equals(clave)){
+             return true;
+         }else{
+             return false;
+         }
+     }
+     
+     //funcion para evaluar el condicional en forma de String
+     public boolean evaluar(String[] vector,int inicio,int fin){
+         int op;
+         if(inicio==fin){
+             return valor(vector[inicio]);
+         }else{
+             op=posop(vector,inicio,fin);
+             if(vector[op].equals("Y")){
+                 return evaluar(vector,inicio,op-1) && evaluar(vector,op+1,fin);
+             }else{
+                 return evaluar(vector,inicio,op-1) || evaluar(vector,op+1,fin);
+             }
+         }
+     }
+     
+     
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -215,12 +263,16 @@ public class Interfaz extends javax.swing.JFrame {
         definirRegla = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tablaVariables = new javax.swing.JTable();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        tablaObjetivos = new javax.swing.JTable();
         jScrollPane2 = new javax.swing.JScrollPane();
         textoRegla = new javax.swing.JTextArea();
         mostrarRegla = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
+        jPanel3 = new javax.swing.JPanel();
+        objetivo = new javax.swing.JTextField();
+        jLabel10 = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
+        jLabel12 = new javax.swing.JLabel();
+        opcionObjetivo = new javax.swing.JComboBox<>();
         panelVaribles = new javax.swing.JPanel();
         agregar_variable = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
@@ -315,19 +367,6 @@ public class Interfaz extends javax.swing.JFrame {
             tablaVariables.getColumnModel().getColumn(1).setCellEditor(new javax.swing.DefaultCellEditor(combo2));
         }
 
-        tablaObjetivos.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-                "OBJETIVO", "VALOR"
-            }
-        ));
-        jScrollPane3.setViewportView(tablaObjetivos);
-        if (tablaObjetivos.getColumnModel().getColumnCount() > 0) {
-            tablaObjetivos.getColumnModel().getColumn(1).setCellEditor(new javax.swing.DefaultCellEditor(combo1));
-        }
-
         textoRegla.setColumns(20);
         textoRegla.setRows(5);
         textoRegla.setEnabled(false);
@@ -357,38 +396,91 @@ public class Interfaz extends javax.swing.JFrame {
             }
         });
 
+        jPanel3.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        objetivo.setEnabled(false);
+        objetivo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                objetivoActionPerformed(evt);
+            }
+        });
+
+        jLabel10.setText("OBJETIVO");
+
+        jLabel11.setText("=");
+
+        jLabel12.setText("VALOR");
+
+        opcionObjetivo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "SI", "NO" }));
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(objetivo, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel11)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(opcionObjetivo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGap(27, 27, 27)
+                        .addComponent(jLabel10)
+                        .addGap(36, 36, 36)
+                        .addComponent(jLabel12)))
+                .addContainerGap(30, Short.MAX_VALUE))
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel10)
+                    .addComponent(jLabel12))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(objetivo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel11)
+                    .addComponent(opcionObjetivo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(37, 37, 37))
+        );
+
         javax.swing.GroupLayout panelReglasLayout = new javax.swing.GroupLayout(panelReglas);
         panelReglas.setLayout(panelReglasLayout);
         panelReglasLayout.setHorizontalGroup(
             panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelReglasLayout.createSequentialGroup()
-                .addGroup(panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGap(18, 18, 18)
+                .addGroup(panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(panelReglasLayout.createSequentialGroup()
-                        .addGap(18, 18, 18)
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelReglasLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(definirRegla)))
-                .addGroup(panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(panelReglasLayout.createSequentialGroup()
-                        .addGap(83, 83, 83)
-                        .addComponent(jLabel8))
-                    .addGroup(panelReglasLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(12, 12, 12)
                         .addGroup(panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(panelReglasLayout.createSequentialGroup()
+                                .addGap(83, 83, 83)
+                                .addComponent(jLabel8))
+                            .addGroup(panelReglasLayout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jLabel3)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(panelReglasLayout.createSequentialGroup()
+                        .addGroup(panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(panelReglasLayout.createSequentialGroup()
                                 .addComponent(mostrarRegla)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 289, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                .addContainerGap(19, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED))
+                            .addGroup(panelReglasLayout.createSequentialGroup()
+                                .addComponent(definirRegla)
+                                .addGap(114, 114, 114)))
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 289, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(22, Short.MAX_VALUE))
         );
         panelReglasLayout.setVerticalGroup(
             panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -399,21 +491,20 @@ public class Interfaz extends javax.swing.JFrame {
                 .addGroup(panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel2)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jButton1)
-                        .addComponent(jLabel3)))
-                .addGap(18, 18, 18)
+                        .addComponent(jLabel3))
+                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGroup(panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelReglasLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(definirRegla)
-                        .addGap(20, 20, 20))
+                        .addGap(18, 18, 18)
+                        .addComponent(mostrarRegla))
                     .addGroup(panelReglasLayout.createSequentialGroup()
-                        .addGroup(panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(mostrarRegla))
-                        .addContainerGap(22, Short.MAX_VALUE))))
+                        .addGap(18, 18, 18)
+                        .addGroup(panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(definirRegla)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGap(22, 22, Short.MAX_VALUE))
         );
 
         panelVaribles.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -447,7 +538,7 @@ public class Interfaz extends javax.swing.JFrame {
                         .addComponent(NombreVariable)
                         .addGap(55, 55, 55))))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelVariblesLayout.createSequentialGroup()
-                .addContainerGap(120, Short.MAX_VALUE)
+                .addContainerGap(106, Short.MAX_VALUE)
                 .addComponent(jLabel6)
                 .addGap(70, 70, 70))
         );
@@ -497,7 +588,7 @@ public class Interfaz extends javax.swing.JFrame {
                     .addGroup(panelObjetivosLayout.createSequentialGroup()
                         .addGap(62, 62, 62)
                         .addComponent(jLabel7)))
-                .addContainerGap(52, Short.MAX_VALUE))
+                .addContainerGap(38, Short.MAX_VALUE))
         );
         panelObjetivosLayout.setVerticalGroup(
             panelObjetivosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -543,18 +634,17 @@ public class Interfaz extends javax.swing.JFrame {
                 .addComponent(definirPregunta)
                 .addGap(242, 242, 242))
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(33, 33, 33)
-                        .addComponent(listaPreguntas, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(27, 27, 27)
-                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 379, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(verficarPregunta, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(253, 253, 253)
-                        .addComponent(jLabel5)))
-                .addContainerGap(53, Short.MAX_VALUE))
+                .addContainerGap()
+                .addComponent(listaPreguntas, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 379, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(34, 34, 34)
+                .addComponent(verficarPregunta, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel5)
+                .addGap(201, 201, 201))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -606,7 +696,7 @@ public class Interfaz extends javax.swing.JFrame {
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addGap(22, 22, 22)
                                 .addComponent(ejecutar)))))
-                .addContainerGap(112, Short.MAX_VALUE))
+                .addContainerGap(98, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -690,20 +780,17 @@ public class Interfaz extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(104, 104, 104)
                         .addComponent(reiniciar)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 145, Short.MAX_VALUE)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addGap(18, 18, 18)
                         .addComponent(combo1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(combo2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(panelReglas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 39, Short.MAX_VALUE))))
+                        .addComponent(combo2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(panelReglas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(11, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -758,8 +845,7 @@ public class Interfaz extends javax.swing.JFrame {
         verificarModelo.setEnabled(true);
         ejecutar.setEnabled(true);
         problema=new Problema();
-        JFrame frame = new JFrame("INGRESO DE DATOS");
-        problema.nombre = JOptionPane.showInputDialog(frame, "¿NOMBRE DEL NUEVO PROBLEMA?");      
+    
  
     }//GEN-LAST:event_jMenuItem3ActionPerformed
 
@@ -803,27 +889,34 @@ public class Interfaz extends javax.swing.JFrame {
     }//GEN-LAST:event_agregar_variableActionPerformed
 
     private void definir_obejtivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_definir_obejtivoActionPerformed
-    DefaultTableModel modelo_objetivos=(DefaultTableModel) tablaObjetivos.getModel(); 
+DefaultTableModel modelo_reglas=(DefaultTableModel) tablaVariables.getModel();     
     
           //para agreagar las variables objetivos al diccionario de objetivos
            problema.objetivos.put((String) lista_objetivos.getSelectedItem(),false);
+           problema.variables.remove((String) lista_objetivos.getSelectedItem());
+           objetivo.setText((String)lista_objetivos.getSelectedItem());
    
-          //para borrar la tabla 
-          for (int i = modelo_objetivos.getRowCount() -1; i >= 0; i--){ 
-          modelo_objetivos.removeRow(i); 
-          } 
         
-          
+    
+     //para corregir la tabla de variables sin los objetivos
+     //para elminar la tabla
+        System.out.println(modelo_reglas.getRowCount());
+        for (int i = modelo_reglas.getRowCount() -1; i >= 0; i--){ 
+          modelo_reglas.removeRow(i); 
+        } 
         
-         //para insertar los objetivos a la tabla
-         Iterator it_variables8 = problema.objetivos.entrySet().iterator();
-            while (it_variables8.hasNext()) 
-             {
-                 Map.Entry e = (Map.Entry)it_variables8.next();
-                 modelo_objetivos.addRow(new Object[]{e.getKey(),""});
-             }
+        listaPreguntas.removeAllItems();
+        //para generar la nueva tabla
+           Iterator it = problema.variables.entrySet().iterator();
+          while (it.hasNext()) {
+            Map.Entry e = (Map.Entry)it.next();
+            //para agrrgar los items
+             lista_objetivos.addItem((String) e.getKey());
+             listaPreguntas.addItem((String) e.getKey());
+            //para agregar la linea a la tabla de variables
+             modelo_reglas.addRow(new Object[]{e.getKey(),"",""});
 
-           
+            }
           
          
             
@@ -831,14 +924,10 @@ public class Interfaz extends javax.swing.JFrame {
     }//GEN-LAST:event_definir_obejtivoActionPerformed
 
     private void definirReglaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_definirReglaActionPerformed
-         DefaultTableModel modelo_objetivos=(DefaultTableModel) tablaObjetivos.getModel(); 
+         
         problema.reglas.add(textoRegla.getText().replaceAll("\\s",""));
         textoRegla.setText(" ");
-        //para borrar la tabla 
-          for (int i = modelo_objetivos.getRowCount() -1; i >= 0; i--){ 
-             modelo_objetivos.removeRow(i); 
-          } 
-        
+        objetivo.setText(" ");
         
     }//GEN-LAST:event_definirReglaActionPerformed
 
@@ -852,19 +941,19 @@ public class Interfaz extends javax.swing.JFrame {
         for (int i = 0; i <problema.variables.size()-1; i++) {
            if(tablaVariables.getValueAt(i,1).equals("SI")&&tablaVariables.getValueAt(i,2).equals("Y")){
                 linea1+=(String) tablaVariables.getValueAt(i,0)+"="+"true"+"-Y-";
-                regla+=tablaVariables.getValueAt(i,0)+" && ";
+                //regla+=tablaVariables.getValueAt(i,0)+" && ";
                 
             }else if(tablaVariables.getValueAt(i,1).equals("SI")&&tablaVariables.getValueAt(i,2).equals("O")){
                 linea1+=(String) tablaVariables.getValueAt(i,0)+"="+"true"+"-O-";
-                regla+=tablaVariables.getValueAt(i,0)+" || ";
+                //regla+=tablaVariables.getValueAt(i,0)+" || ";
                 
             }else if(tablaVariables.getValueAt(i,1).equals("NO")&&tablaVariables.getValueAt(i,2).equals("Y")){
                 linea1+=(String) tablaVariables.getValueAt(i,0)+"="+"false"+"-Y-";
-                regla+="!"+tablaVariables.getValueAt(i,0)+" && ";
+                //regla+="!"+tablaVariables.getValueAt(i,0)+" && ";
                 
             }else if(tablaVariables.getValueAt(i,1).equals("NO")&&tablaVariables.getValueAt(i,2).equals("O")){
                 linea1+=(String) tablaVariables.getValueAt(i,0)+"="+"false"+"-O-";
-                regla+="!"+tablaVariables.getValueAt(i,0)+" || ";
+                //regla+="!"+tablaVariables.getValueAt(i,0)+" || ";
                 
             }  
         }
@@ -872,20 +961,20 @@ public class Interfaz extends javax.swing.JFrame {
             //linea1+=(String) tablaVariables.getValueAt(problema.variables.size()-1,0)+"="+(String) tablaVariables.getValueAt(problema.variables.size()-1,1);
             if(tablaVariables.getValueAt(problema.variables.size()-1,1).equals("SI")){
                 linea1+=(String) tablaVariables.getValueAt(problema.variables.size()-1,0)+"="+"true";
-                regla+=tablaVariables.getValueAt(problema.variables.size()-1,0)+"){";
+               // regla+=tablaVariables.getValueAt(problema.variables.size()-1,0)+"){";
             }else{
                 linea1+=(String) tablaVariables.getValueAt(problema.variables.size()-1,0)+"="+"false";
-                regla+="!"+tablaVariables.getValueAt(problema.variables.size()-1,0)+"){";
+               // regla+="!"+tablaVariables.getValueAt(problema.variables.size()-1,0)+"){";
             }
             
         //para agregar el objetivo
             //linea1+=" ENTONCES "+(String)tablaObjetivos.getValueAt(0,0)+"="+(String)tablaObjetivos.getValueAt(0,1);
-            if(tablaObjetivos.getValueAt(0,1).equals("SI")){
-                linea1+="-ENTONCES-"+(String)tablaObjetivos.getValueAt(0,0)+"="+"true";
-                regla+=(String)tablaObjetivos.getValueAt(0,0)+"="+"true"+"}";
+            if(opcionObjetivo.getSelectedItem().equals("SI")){
+                linea1+="-ENTONCES-"+objetivo.getText()+"="+"true";
+                //regla+=(String)tablaObjetivos.getValueAt(0,0)+"="+"true"+"}";
             }else{
-                linea1+="-ENTONCES-"+(String)tablaObjetivos.getValueAt(0,0)+"="+"false";
-                regla+=(String)tablaObjetivos.getValueAt(0,0)+"="+"false"+"}";
+                linea1+="-ENTONCES-"+objetivo.getText()+"="+"false";
+               // regla+=(String)tablaObjetivos.getValueAt(0,0)+"="+"false"+"}";
             }
             
             
@@ -958,7 +1047,14 @@ public class Interfaz extends javax.swing.JFrame {
     }//GEN-LAST:event_ABRIRActionPerformed
 
     private void ejecutarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ejecutarActionPerformed
-     
+    //para mostrar las variables
+     String variables="REPUESTA DEL USUARIO\n";
+     //para mostrar las reglas
+     String reglas="REGLAS\n";
+      //para mostrar las respuestas
+     String respuestas="RESULTADOS DE LAS REGLAS\n";
+     //PAR MOSTRAR EL RESULTADOS TOTAL
+     String resultado="";
     //para asignar las respuestas al diccionario de variables
         Iterator it_variables2= problema.preguntas.entrySet().iterator();
             while (it_variables2.hasNext()) 
@@ -974,87 +1070,63 @@ public class Interfaz extends javax.swing.JFrame {
                     }
              }
             
-     boolean bandera=true;
-     for(int j=0;j<problema.reglas.size();j++){
-
-         String[] tokens = problema.reglas.get(j).split("-");
-         System.out.println(Arrays.asList(tokens));
-         int i=1;
-         while(!"ENTONCES".equals(tokens[i]))
-         {
-             if(tokens[i].equals("Y")){
-                 i++;
-             }if(tokens[i].equals("O")){
-                 i++;
-             }else{
-                 String[] tokens2=tokens[i].split("=");
-                 System.out.println(Arrays.asList(tokens2));
-                 boolean clave=false;
-                 if(tokens2[1].equals("true")){
-                     clave=true;
-                 }else{
-                     clave=false;
-                 }
-                 System.out.println(clave);
-                     System.out.println(tokens2[0]);
-                     System.out.println(problema.variables.get(tokens2[0]));
-                 if(problema.variables.get(tokens2[0]).equals(clave)){
-                     System.out.println("SI ESTA");
-                        i++;
-                 }else{
-                      System.out.println("NO ESTA");
-                        bandera=false;
-                        break;
-                 }
-            }
-             
-         }
-         //////////////////////ACA VOY
-         System.out.println(bandera);
-          if(bandera){
-             //si la bandera esta true es por que se cumplieron todas las condiciones
-                 System.out.println(tokens[tokens.length-1]);
-                 String token5[]=tokens[tokens.length-1].split("=");
-                 System.out.println(token5[1]);
-                 if(token5[1].equals("true")){
-                     System.out.println(token5[0]);
-                     System.out.println("donde ES");
-                      problema.respuestas.put(token5[0],true);
-                      
-                   }else{
-                      problema.respuestas.put(token5[0],false);
-
-                   }
-                 
-            }else{
-              System.out.println(tokens[tokens.length-1]);
-                 String token5[]=tokens[tokens.length-1].split("=");
-                 System.out.println("donde no es");
-                 if(token5[1].equals("true")){
-                      problema.respuestas.put(token5[0],false);
-                      
-                   }else{
-                      problema.respuestas.put(token5[0],true);
-
-                   }
-            }
-        }
-     
-     
-     //para imprimir las respuestas
-        System.out.println(problema.respuestas.get(0));
-        Iterator it_variables9= problema.respuestas.entrySet().iterator();
-            while (it_variables9.hasNext()) 
-             {
-                 Map.Entry e = (Map.Entry)it_variables9.next();
-                 if(e.getKey().equals(true)){
-                     JOptionPane.showMessageDialog(null,(String)e.getKey()+" ES IGUAL: "+"NO"+"\n"); 
-                 }else{
-                     JOptionPane.showMessageDialog(null,(String)e.getKey()+" ES IGUALA: "+"SI"+"\n"); 
-                 }
-                    
-             }
+            System.out.println(Collections.singletonList(problema.variables));
+            
     
+        for (int i = 0; i <problema.reglas.size(); i++) {
+            //parto la regla en tokens 
+            String[] tokens = problema.reglas.get(i).split("-");
+            int inicio=1;
+            int fin=(tokens.length)-3;
+            if(evaluar(tokens,inicio,fin)){
+                String[] respuesta=tokens[(tokens.length)-1].split("=");
+                boolean clave2;
+                if(respuesta[1].equals("true")){
+                    clave2=true;
+                    problema.respuestas.put(respuesta[0],clave2);
+                }else{
+                    clave2=false;
+                    problema.respuestas.put(respuesta[0],clave2);
+                }
+
+            }else{
+                String[] respuesta2=tokens[(tokens.length)-1].split("=");
+                boolean clave3;
+                if(respuesta2[1].equals("true")){
+                    clave3=false;
+                    problema.respuestas.put(respuesta2[0],clave3);
+                }else{
+                    clave3=true;
+                    problema.respuestas.put(respuesta2[0],clave3);
+                }
+             }  
+            
+        }
+        
+        System.out.println(Collections.singletonList(problema.respuestas));
+       //para mostrar las variables con su respuesta
+        Iterator it_variables= problema.variables.entrySet().iterator();
+       while (it_variables2.hasNext()) 
+             {
+                 Map.Entry e = (Map.Entry)it_variables2.next();
+                 variables+=e.getKey()+" = "+e.getValue()+"\n";
+              }
+       
+       //para mostrar las reglas
+        for (int i = 0; i <problema.reglas.size(); i++) {
+            reglas+="regla "+(i+1)+"------"+" "+problema.reglas.get(i)+"\n";
+        }
+        //para mostrar los resultados de la reglas
+        Iterator it_respuestas= problema.respuestas.entrySet().iterator();
+       while (it_respuestas.hasNext()) 
+             {
+                 Map.Entry e = (Map.Entry)it_respuestas.next();
+                 respuestas+=e.getKey()+" = "+e.getValue()+"\n";
+              }
+            
+       resultado=variables+reglas+respuestas;
+         //PARA IMPRIMIR EL RESULTADO FINAL
+         JOptionPane.showMessageDialog(null,resultado);
 
     }//GEN-LAST:event_ejecutarActionPerformed
 
@@ -1095,6 +1167,10 @@ public class Interfaz extends javax.swing.JFrame {
         Interfaz.main(args);
         dispose();
     }//GEN-LAST:event_reiniciarActionPerformed
+
+    private void objetivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_objetivoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_objetivoActionPerformed
 
     /**
      * @param args the command line arguments
@@ -1150,6 +1226,9 @@ public class Interfaz extends javax.swing.JFrame {
     private javax.swing.JButton jButton1;
     private javax.swing.JInternalFrame jInternalFrame1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -1166,20 +1245,21 @@ public class Interfaz extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JComboBox<String> listaPreguntas;
     private javax.swing.JComboBox<String> lista_objetivos;
     private javax.swing.JButton mostrarRegla;
+    private javax.swing.JTextField objetivo;
+    private javax.swing.JComboBox<String> opcionObjetivo;
     private javax.swing.JPanel panelObjetivos;
     private javax.swing.JPanel panelReglas;
     private javax.swing.JPanel panelVaribles;
     private javax.swing.JTextArea pregunta;
     private javax.swing.JButton reiniciar;
-    private javax.swing.JTable tablaObjetivos;
     private javax.swing.JTable tablaVariables;
     private javax.swing.JTextArea textoRegla;
     private javax.swing.JButton verficarPregunta;
