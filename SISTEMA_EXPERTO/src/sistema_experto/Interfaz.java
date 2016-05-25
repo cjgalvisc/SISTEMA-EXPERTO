@@ -63,7 +63,7 @@ public class Interfaz extends javax.swing.JFrame {
     //expresiones regulares para verificar la sintaxis del TXT.SE
         String patron_comentario="^[%]+[\\w]";
         String patron_variable="^[V]+[-]+[\\w]";
-        String patron_objetivo="^C+[-]+[\\w]";
+        String patron_objetivo="^[C]+[-]+[\\w]";
         String patron_regla="[\\w]";
      //donde queda el resultado final
      ArrayList<String> resultado=new ArrayList<String>();  
@@ -92,8 +92,10 @@ public class Interfaz extends javax.swing.JFrame {
      {
          //creo un modelo de la tabla vairables para meter las variables
          DefaultTableModel modelo_variables=(DefaultTableModel) tablaVariables.getModel(); 
+         
          //instancion un objeto de la clase problema cada vez que se abre un nuevo archivo
          problema=new Problema();
+         
          try{
                 BufferedReader bf=new BufferedReader(new FileReader(direccion));
                 while((linea=bf.readLine())!=null){
@@ -159,7 +161,7 @@ public class Interfaz extends javax.swing.JFrame {
                           String token1=tokens.nextToken();
                           String token2=tokens.nextToken();
                           problema.objetivos.put(token2, false);
-                          objetivo.setText(token2);
+                          //objetivo.setText(token2);
                                               
                       }else if(coincide_reg){//si se cumple es una regla
                           
@@ -172,6 +174,7 @@ public class Interfaz extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(null,"EL ARCHIVO NO SE PUDO LEER");
             }
     }
+     
      //funcion para verificar sintaxis
      public boolean sintaxis(ArrayList<String> p)
      {
@@ -207,10 +210,15 @@ public class Interfaz extends javax.swing.JFrame {
      //funcion para encontrar el siguiente condicional
      public int posop(String[] vector,int inicio,int fin){
          int posicion=0;
-         for (int i =inicio; i <fin ; i++) {
+         //CORRECCION
+         //recorro todo el vector buscando donde hay UN operador 
+         //cuadno lo entcuentre guardo el idicie el la variable posicion
+         //y la devuelvo
+         
+         for (int i =inicio; i <=fin ; i++) {
              if(vector[i].equals("Y")||vector[i].equals("O")){
                  posicion=i;
-                 i=fin;
+                 i=fin+1;
               }
          }
          return posicion;
@@ -219,6 +227,8 @@ public class Interfaz extends javax.swing.JFrame {
      //funcion para verificar si la repuesta del usuario es igual a la del condicional
      public boolean valor(String valor){
          boolean clave;
+         //este pedazo es por ejemplo A=true
+         //por eso lo vuelvo a parir con el separador =
          String pedazos[]=valor.split("=");
          
          if(pedazos[1].equals("true")){
@@ -226,7 +236,9 @@ public class Interfaz extends javax.swing.JFrame {
          }else{
                 clave=false;
            }
-         
+         //preginto si las varibales que respondio el usuario tienen el mismo
+         //valor del encotnrado en la condicion
+         //si es asi entonces devuelvo true de lo contrario devuelvo false
          if(problema.variables.get(pedazos[0]).equals(clave)){
              return true;
          }else{
@@ -234,7 +246,9 @@ public class Interfaz extends javax.swing.JFrame {
          }
      }
      
-     //funcion para evaluar el condicional en forma de String
+     //funcion para evaluar el condicional en forma de String 
+     //inicio= pocision del vector mas 1
+     //fin= el tamaño del vector menos 3
      public boolean evaluar(String[] vector,int inicio,int fin){
          int op;
          if(inicio==fin){
@@ -242,9 +256,11 @@ public class Interfaz extends javax.swing.JFrame {
          }else{
              op=posop(vector,inicio,fin);
              if(vector[op].equals("Y")){
-                 return evaluar(vector,inicio,op-1) && evaluar(vector,op+1,fin);
-             }else{
-                 return evaluar(vector,inicio,op-1) || evaluar(vector,op+1,fin);
+                 //  si se cumple realiza una comparacion true  and true
+                 return (evaluar(vector,inicio,op-1)) &&(evaluar(vector,op+1,fin));
+             }else{ 
+                 //  si no se cumple realiza una comparacion true  or true
+                 return (evaluar(vector,inicio,op-1)) || (evaluar(vector,op+1,fin));
              }
          }
      }
@@ -282,6 +298,7 @@ public class Interfaz extends javax.swing.JFrame {
         jLabel11 = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
         opcionObjetivo = new javax.swing.JComboBox<>();
+        jLabel13 = new javax.swing.JLabel();
         panelVaribles = new javax.swing.JPanel();
         agregar_variable = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
@@ -302,7 +319,6 @@ public class Interfaz extends javax.swing.JFrame {
         jLabel9 = new javax.swing.JLabel();
         verificarModelo = new javax.swing.JButton();
         ejecutar = new javax.swing.JButton();
-        combo1 = new javax.swing.JComboBox<>();
         combo2 = new javax.swing.JComboBox<>();
         reiniciar = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
@@ -462,13 +478,16 @@ public class Interfaz extends javax.swing.JFrame {
                 .addGap(37, 37, 37))
         );
 
+        jLabel13.setFont(new java.awt.Font("Times New Roman", 1, 24)); // NOI18N
+        jLabel13.setText("REGLA GENERADA");
+
         javax.swing.GroupLayout panelReglasLayout = new javax.swing.GroupLayout(panelReglas);
         panelReglas.setLayout(panelReglasLayout);
         panelReglasLayout.setHorizontalGroup(
             panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelReglasLayout.createSequentialGroup()
                 .addGap(18, 18, 18)
-                .addGroup(panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGroup(panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addGroup(panelReglasLayout.createSequentialGroup()
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -479,15 +498,18 @@ public class Interfaz extends javax.swing.JFrame {
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(panelReglasLayout.createSequentialGroup()
-                        .addGroup(panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, panelReglasLayout.createSequentialGroup()
+                        .addGroup(panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(definirRegla, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(mostrarRegla, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(panelReglasLayout.createSequentialGroup()
-                                .addComponent(mostrarRegla)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED))
+                                .addGap(18, 18, 18)
+                                .addComponent(jScrollPane2))
                             .addGroup(panelReglasLayout.createSequentialGroup()
-                                .addComponent(definirRegla)
-                                .addGap(114, 114, 114)))
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 289, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(121, 121, 121)
+                                .addComponent(jLabel13)
+                                .addGap(0, 0, Short.MAX_VALUE)))))
                 .addContainerGap(30, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelReglasLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -507,15 +529,15 @@ public class Interfaz extends javax.swing.JFrame {
                         .addComponent(jButton1)
                         .addComponent(jLabel3))
                     .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGroup(panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addGroup(panelReglasLayout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addComponent(mostrarRegla))
-                    .addGroup(panelReglasLayout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addGroup(panelReglasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(definirRegla)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addComponent(mostrarRegla)
+                        .addGap(50, 50, 50)
+                        .addComponent(definirRegla))
+                    .addComponent(jScrollPane2))
                 .addGap(22, 22, Short.MAX_VALUE))
         );
 
@@ -723,13 +745,6 @@ public class Interfaz extends javax.swing.JFrame {
                 .addContainerGap(16, Short.MAX_VALUE))
         );
 
-        combo1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "SI", "NO" }));
-        combo1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                combo1ActionPerformed(evt);
-            }
-        });
-
         combo2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "SI", "NO" }));
 
         reiniciar.setText("REINICIAR");
@@ -824,9 +839,7 @@ public class Interfaz extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
-                        .addGap(18, 18, 18)
-                        .addComponent(combo1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(64, 64, 64)
                         .addComponent(combo2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(panelReglas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -840,7 +853,6 @@ public class Interfaz extends javax.swing.JFrame {
                         .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel1)
-                            .addComponent(combo1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(combo2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(21, 21, 21)
@@ -884,16 +896,21 @@ public class Interfaz extends javax.swing.JFrame {
         
         verificarModelo.setEnabled(true);
         ejecutar.setEnabled(true);
+        
+        //se instancia un nuevo objeto de tipo problema
         problema=new Problema();
     
  
     }//GEN-LAST:event_jMenuItem3ActionPerformed
 
     private void agregar_variableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_agregar_variableActionPerformed
+    
+      // llama el modelo de la tablavariables  
     DefaultTableModel modelo_reglas=(DefaultTableModel) tablaVariables.getModel(); 
         
     if(NombreVariable.getText().length()!=0){
-        //para elminar la tabla
+        //para elminar la tabla para que no se sobrescriban 
+        //y se cargan de nuevo  con la que se acaba de adicionar
         System.out.println(modelo_reglas.getRowCount());
         for (int i = modelo_reglas.getRowCount() -1; i >= 0; i--){ 
           modelo_reglas.removeRow(i); 
@@ -902,9 +919,10 @@ public class Interfaz extends javax.swing.JFrame {
        //para remover la lista de ITEMS
         lista_objetivos.removeAllItems();
         listaPreguntas.removeAllItems();
+        //se agregan  las variables al objetos y se le asigna false a todas las variables por defecto
         problema.variables.put((String)NombreVariable.getText().replaceAll("\\s",""),false);
         
-        //para agregar los items a la tabla y las listas
+        //para agregar los items a la tabla y las listas se recorre el diccionario de variables
         Iterator it = problema.variables.entrySet().iterator();
           while (it.hasNext()) {
             Map.Entry e = (Map.Entry)it.next();
@@ -917,9 +935,10 @@ public class Interfaz extends javax.swing.JFrame {
             }
         
        //para eliminar el area de texto 
-        NombreVariable.setText(" ");
+        NombreVariable.setText("");
         
     }else{
+        // en caso de que no se coloque nada arroja el mensaje 
         JOptionPane.showMessageDialog( null, "FALTA EL NOMBRE DE  LA VARIABLE" );
     }
         
@@ -929,11 +948,14 @@ public class Interfaz extends javax.swing.JFrame {
     }//GEN-LAST:event_agregar_variableActionPerformed
 
     private void definir_obejtivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_definir_obejtivoActionPerformed
-DefaultTableModel modelo_reglas=(DefaultTableModel) tablaVariables.getModel();     
+
+        //se llama la tabla variables para eliminar las que se convierten en objetivos
+        DefaultTableModel modelo_reglas=(DefaultTableModel) tablaVariables.getModel();     
     
           //para agreagar las variables objetivos al diccionario de objetivos
            problema.objetivos.put((String) lista_objetivos.getSelectedItem(),false);
            problema.variables.remove((String) lista_objetivos.getSelectedItem());
+           // asigna la variable  seleccionada a la casilla de objetivo
            objetivo.setText((String)lista_objetivos.getSelectedItem());
    
         
@@ -944,16 +966,17 @@ DefaultTableModel modelo_reglas=(DefaultTableModel) tablaVariables.getModel();
         for (int i = modelo_reglas.getRowCount() -1; i >= 0; i--){ 
           modelo_reglas.removeRow(i); 
         } 
-        
+        //se borra de nuevo la tabla variables
         listaPreguntas.removeAllItems();
         //para generar la nueva tabla
            Iterator it = problema.variables.entrySet().iterator();
           while (it.hasNext()) {
             Map.Entry e = (Map.Entry)it.next();
-            //para agrrgar los items
+            //para agrrgar los items para reasignar los nuevos objetivos
              lista_objetivos.addItem((String) e.getKey());
+             // reasigna las nuevas variables para preguntar 
              listaPreguntas.addItem((String) e.getKey());
-            //para agregar la linea a la tabla de variables
+            //para agregar la linea a la tabla de variables a la tabla antigua le quita los variables que son objetivos
              modelo_reglas.addRow(new Object[]{e.getKey(),"",""});
 
             }
@@ -965,19 +988,25 @@ DefaultTableModel modelo_reglas=(DefaultTableModel) tablaVariables.getModel();
 
     private void definirReglaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_definirReglaActionPerformed
          
+        // adiciona en elarray list de reglas la regla generada 
         problema.reglas.add(textoRegla.getText().replaceAll("\\s",""));
-        textoRegla.setText(" ");
-        objetivo.setText(" ");
+        textoRegla.setText("");
+        objetivo.setText("");
         
     }//GEN-LAST:event_definirReglaActionPerformed
 
     private void mostrarReglaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mostrarReglaActionPerformed
+        // aca se definiran las reglas .....
+        
+        // variable donde quedara  la regla como string y utiliza como token el -
         String linea1="SI-";
-        String regla="if(";
+        
+       // String regla="if(";
         System.out.println(problema.variables.size());
-
+        //al definir la regla borre el texareano
         textoRegla.setText("");
         
+        // recorre todo la tabla variables para formar la parte de la regla anters del ENTNCES
         for (int i = 0; i <problema.variables.size()-1; i++) {
            if(tablaVariables.getValueAt(i,1).equals("SI")&&tablaVariables.getValueAt(i,2).equals("Y")){
                 linea1+=(String) tablaVariables.getValueAt(i,0)+"="+"true"+"-Y-";
@@ -998,6 +1027,7 @@ DefaultTableModel modelo_reglas=(DefaultTableModel) tablaVariables.getModel();
             }  
         }
             
+        // PARA TERMINAR DE LLENAR EL LADO IZQUIERDO  CON LA ULTIMA CONDICION
             //linea1+=(String) tablaVariables.getValueAt(problema.variables.size()-1,0)+"="+(String) tablaVariables.getValueAt(problema.variables.size()-1,1);
             if(tablaVariables.getValueAt(problema.variables.size()-1,1).equals("SI")){
                 linea1+=(String) tablaVariables.getValueAt(problema.variables.size()-1,0)+"="+"true";
@@ -1007,7 +1037,7 @@ DefaultTableModel modelo_reglas=(DefaultTableModel) tablaVariables.getModel();
                // regla+="!"+tablaVariables.getValueAt(problema.variables.size()-1,0)+"){";
             }
             
-        //para agregar el objetivo
+        //para agregar el objetivo despues del entonces 
             //linea1+=" ENTONCES "+(String)tablaObjetivos.getValueAt(0,0)+"="+(String)tablaObjetivos.getValueAt(0,1);
             if(opcionObjetivo.getSelectedItem().equals("SI")){
                 linea1+="-ENTONCES-"+objetivo.getText()+"="+"true";
@@ -1018,7 +1048,7 @@ DefaultTableModel modelo_reglas=(DefaultTableModel) tablaVariables.getModel();
             }
             
             
-            System.out.println(regla);
+           //muestra la regla generada  en el texarea
         textoRegla.setText(linea1);
          
     }//GEN-LAST:event_mostrarReglaActionPerformed
@@ -1048,32 +1078,40 @@ DefaultTableModel modelo_reglas=(DefaultTableModel) tablaVariables.getModel();
     }//GEN-LAST:event_verficarPreguntaActionPerformed
 
     private void verificarModeloActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_verificarModeloActionPerformed
-        
+        // muestra que  tiene el problema en el momento
         String variables="";
         String objetivos="";
         String reglas="";
-        //para recorrer las varibles
+        //para recorrer el diccionario de variables varibles
         Iterator it_variables= problema.variables.entrySet().iterator();
             while (it_variables.hasNext()) 
              {
                  Map.Entry e = (Map.Entry)it_variables.next();
-                 variables+=e.getKey()+" "+e.getValue()+"\n";
+                 // va almacenando en el string concatenandolas
+                 variables+="V"+" "+e.getKey()+" "+e.getValue()+"\n";
                  lista_codigo.add("V-"+(String) e.getKey());
              }
-        //para recorrer los objetivos
+        //para recorrer el diccionario de  objetivos
         Iterator it_variables2= problema.objetivos.entrySet().iterator();
             while (it_variables2.hasNext()) 
              {
                  Map.Entry e = (Map.Entry)it_variables2.next();
+                  // va almacenando en el string concatenandolas
                  objetivos+="C"+" "+e.getKey()+" "+e.getValue()+"\n";
+                 //almacena  en  la variable global para luego poderla guardar en el 
+                 //archivo generado .SE
                  lista_codigo.add("C-"+e.getKey());
              }
-        //para recorre las reglas
+        //para recorre EL array list de las  reglas
         for (int i = 0; i < problema.reglas.size(); i++) {
+             // va almacenando en el string concatenandolas
             reglas+=problema.reglas.get(i)+"\n";
             lista_codigo.add(problema.reglas.get(i));
         }
+        
         codigo=variables+objetivos+reglas;
+        //muestra en mensaje que variables hay , 
+        //que objetivos y que reglas
         JOptionPane.showMessageDialog( null,codigo); 
     }//GEN-LAST:event_verificarModeloActionPerformed
 
@@ -1099,16 +1137,22 @@ DefaultTableModel modelo_reglas=(DefaultTableModel) tablaVariables.getModel();
      String respuestas="RESULTADOS DE LAS REGLAS\n";
      //PAR MOSTRAR EL RESULTADOS TOTAL
      String resultado="";
-    //para asignar las respuestas al diccionario de variables
+     
+    //cilo para generar cuatnas preguntas haya
         Iterator it_variables2= problema.preguntas.entrySet().iterator();
             while (it_variables2.hasNext()) 
              {
                  Map.Entry e = (Map.Entry)it_variables2.next();
-                    
+                    //cada vez que hay una pregunta, se muestra un mensaje con dicha pregunta y se almacena su 
+                    //respueta en la clave correspondiente de la pregunta("e.getValue")
                     int n=JOptionPane.showConfirmDialog (null,(String) e.getValue(),"PREGUNTA", JOptionPane.YES_NO_OPTION);
+                    //so la pregunta es si 
                     if(JOptionPane.OK_OPTION==n){
+                       //se modifican los valores en el diccionario de valores 
                         problema.variables.replace((String) e.getKey(),true);
+                    //si la pregunta es No
                     }else{
+                        //se modifican los valores en el diccionario de valores 
                          problema.variables.replace((String) e.getKey(),false);
                          
                     }
@@ -1116,13 +1160,19 @@ DefaultTableModel modelo_reglas=(DefaultTableModel) tablaVariables.getModel();
             
             System.out.println(Collections.singletonList(problema.variables));
             
-    
+        //MOTOR DE INFERENCIA(version academica)
+        
+        //recorro el arraylist de las reglas
         for (int i = 0; i <problema.reglas.size(); i++) {
             //parto la regla en tokens 
             String[] tokens = problema.reglas.get(i).split("-");
-            int inicio=1;
-            int fin=(tokens.length)-3;
+            
+            int inicio=1;// pocision despues del SI e
+            int fin=(tokens.length)-3;//posicon antes del ENTONCES
+            //evaluar es la funcion que verfica si la regla se cumple
             if(evaluar(tokens,inicio,fin)){
+                //si la funcion retorna true entonces se almacena la respuesta 
+                //como esta en la condicion(despues del ENTONCES)
                 String[] respuesta=tokens[(tokens.length)-1].split("=");
                 boolean clave2;
                 if(respuesta[1].equals("true")){
@@ -1134,6 +1184,8 @@ DefaultTableModel modelo_reglas=(DefaultTableModel) tablaVariables.getModel();
                 }
 
             }else{
+                //si la funcion retorna FALSE entonces se almacena la respuesta 
+                //de manera contraria a como esta en la condicion(despues del ENTONCES)
                 String[] respuesta2=tokens[(tokens.length)-1].split("=");
                 boolean clave3;
                 if(respuesta2[1].equals("true")){
@@ -1198,13 +1250,10 @@ DefaultTableModel modelo_reglas=(DefaultTableModel) tablaVariables.getModel();
     }//GEN-LAST:event_jMenuItem4ActionPerformed
 
     private void definirPreguntaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_definirPreguntaActionPerformed
-    problema.preguntas.put((String) listaPreguntas.getSelectedItem(),pregunta.getText());
-    pregunta.setText(" ");
+        //al diccionario de preguntas adiciona  como clave la variable y como valor  la pregunta realizada por el usuario
+        problema.preguntas.put((String) listaPreguntas.getSelectedItem(),pregunta.getText());
+    pregunta.setText("");
     }//GEN-LAST:event_definirPreguntaActionPerformed
-
-    private void combo1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_combo1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_combo1ActionPerformed
 
     private void reiniciarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reiniciarActionPerformed
        String[] args=new String[1];
@@ -1246,12 +1295,11 @@ DefaultTableModel modelo_reglas=(DefaultTableModel) tablaVariables.getModel();
     private void acercadeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_acercadeActionPerformed
         // genera el mensaje de about del sistema 
         
-        JOptionPane.showOptionDialog(this, "Product Version: DIAGNOSTICO DE CARRO   V.2.2\n" +
+        JOptionPane.showOptionDialog(this, "Product Version: SHELL  SISTEMA EXPERTO   V.1.0\n" +
             "Actualizaciones: en proceso...\n" +
             "Java: 1.7.0_51; Java HotSpot(TM) 64-Bit Server VM 24.51-b03\n" +
             "Runtime: Java(TM) SE Runtime Environment 1.7.0_51-b13\n"
-            + "NetBeans IDE 8.1 (Build 201511021428)\n"
-            + "SWI-Prolog version 7.2.3 \n" +
+            + "NetBeans IDE 8.1 (Build 201511021428)\n"+
             "System recomendado: Windows 7 y posterior\n" +
             "creado por :\n"
             + "            YEISON AGUIRRE OSORIO \n" +
@@ -1325,7 +1373,6 @@ DefaultTableModel modelo_reglas=(DefaultTableModel) tablaVariables.getModel();
     private javax.swing.ButtonGroup buttonGroup4;
     private javax.swing.ButtonGroup buttonGroup5;
     private javax.swing.ButtonGroup buttonGroup6;
-    private javax.swing.JComboBox<String> combo1;
     private javax.swing.JComboBox<String> combo2;
     private javax.swing.JButton definirPregunta;
     private javax.swing.JButton definirRegla;
@@ -1337,6 +1384,7 @@ DefaultTableModel modelo_reglas=(DefaultTableModel) tablaVariables.getModel();
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
