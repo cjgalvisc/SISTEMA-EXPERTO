@@ -1,0 +1,17 @@
+V-bujia
+V-desforzado
+V-humo
+V-chirrean
+V-liquido_frenos
+V-llantas
+V-tirante
+V-direccion
+C-FALLA_MOTOR
+C-FALLA_FRENOS
+C-DESALINEADO
+C-NORMAL
+SI-bujia=true-Y-desforzado=true-Y-humo=true-Y-chirrean=false-Y-liquido_frenos=false-Y-llantas=false-Y-tirante=false-Y-direccion=false-ENTONCES-FALLA_MOTOR=true
+SI-bujia=false-Y-desforzado=false-Y-humo=false-Y-chirrean=true-Y-liquido_frenos=true-Y-llantas=false-Y-tirante=false-Y-direccion=false-ENTONCES-FALLA_FRENOS=true
+SI-bujia=false-Y-desforzado=false-Y-humo=false-Y-chirrean=false-Y-liquido_frenos=false-Y-llantas=true-Y-tirante=true-Y-direccion=true-ENTONCES-DESALINEADO=true
+SI-bujia=false-Y-desforzado=false-Y-humo=false-Y-chirrean=false-Y-liquido_frenos=false-Y-llantas=false-Y-tirante=false-Y-direccion=false-ENTONCES-NORMAL=true
+
